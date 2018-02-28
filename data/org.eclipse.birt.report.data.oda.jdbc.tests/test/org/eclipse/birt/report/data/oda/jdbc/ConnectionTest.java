@@ -175,6 +175,15 @@ public class ConnectionTest {
 		assertFalse( conn.isOpen( ) );
 	}
 
+	@Test
+    public void testJndiConnection( ) throws Exception
+	{
+		Connection conn = TestUtil.openJndiConnection( );
+		assertTrue( conn.isOpen( ) );
+		conn.close( );
+		assertFalse( conn.isOpen( ) );
+	}
+
 	/*
 	 * Class under test for void open(Properties)
 	 */
@@ -256,11 +265,13 @@ public class ConnectionTest {
 			conn.open( props );
 			fail( "Open Connection with wrong property should throw exception" );
 		}
-		catch ( OdaException e )
+		catch ( Throwable e1 )
 		{
-
+			if ( !( e1 instanceof OdaException || e1 instanceof NoClassDefFoundError ) )
+			{
+				throw new OdaException(e1);
+			}
 		}
-
 	}
 
 	/*

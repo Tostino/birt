@@ -30,6 +30,7 @@ public class TotalTest {
     private boolean[] doubleArray1TopBottom = {false, false, false,false,false,true,false,false,false,true,true,true,false,false,true};
     private double[] doubleArray2 = {4, -43, 4, 23, -15, -6, 4, -6, 3, 63, 33, -6, -23, 34};
     private Double[] doubleArray3 = {Double.valueOf( "100" ),Double.valueOf( "20" ),null,Double.valueOf( "300" ),null,Double.valueOf( "40" ),Double.valueOf( "10" ), Double.valueOf( "10" )};
+    private Double[] doubleArrayNull = {null,null};
     private boolean[] doubleArray3TopBottom = {true,false,false,true,false,false,false, false};
     private int[] doubleArray3RankDec = {2, 4, 7, 1, 7, 3, 5, 5 };
     private int[] doubleArray3RankAsc = {7, 5, 1, 8, 1, 6, 3, 3 };
@@ -1005,6 +1006,89 @@ public class TotalTest {
         assertTrue( ret instanceof BigDecimal );
         assertTrue( new BigDecimal( 1 ).compareTo( (BigDecimal) ret ) == 0 );
     }
+	
+	@Test
+	public void testTotalRange( ) throws Exception
+	{
+		IAggrFunction ag = buildInAggrFactory.getAggregation( "range" );
+		Accumulator ac = ag.newAccumulator( );
+		assertEquals( IBuildInAggregation.TOTAL_RANGE_FUNC, ag.getName( ) );
+		assertEquals( IAggrFunction.SUMMARY_AGGR, ag.getType( ) );
+		assertEquals( 1, ag.getParameterDefn( ).length );
+		assertTrue( !ag.getParameterDefn( )[0].isOptional( ) );
+
+		ac.start( );
+		for ( int i = 0; i < doubleArray1.length; i++ )
+		{
+			ac.onRow( new Double[]{
+					new Double( doubleArray1[i] )
+			} );
+		}
+		ac.finish( );
+		assertEquals( new Double( 9.0 ), ac.getValue( ) );
+
+		ac.start( );
+		for ( int i = 0; i < doubleArray2.length; i++ )
+		{
+			ac.onRow( new Double[]{
+					new Double( doubleArray2[i] )
+			} );
+		}
+		ac.finish( );
+		assertEquals( new Double( 106 ), ac.getValue( ) );
+
+		// String data type returns 0
+		ac.start( );
+		for ( int i = 0; i < str1.length; i++ )
+		{
+			ac.onRow( new Object[]{
+					str1[i]
+			} );
+		}
+		ac.finish( );
+		assertEquals( 0d, ac.getValue( ) );
+		
+		// Null data returns null
+		ac.start( );
+		for ( int i = 0; i < doubleArrayNull.length; i++ )
+		{
+			ac.onRow( new Object[]{
+					doubleArrayNull[i]
+			} );
+		}		
+		ac.finish( );
+		assertEquals( null, ac.getValue( ) );
+
+		// No data returns null
+		ac.start( );
+		ac.finish( );
+		assertEquals( null, ac.getValue( ) );
+
+		ac.start( );
+		try
+		{
+			ac.getValue( );
+			assertTrue( false );
+		}
+		catch ( RuntimeException e )
+		{
+			assertTrue( true );
+		}
+
+		// test Total.RANGE() for BigDecimal data
+		ac.start( );
+		for ( int i = 0; i < bigDecimalArray.length; i++ )
+		{
+			ac.onRow( new Object[]{
+					bigDecimalArray[i]
+			} );
+		}
+		ac.finish( );
+		Object ret = ac.getValue( );
+		assertTrue( ret instanceof Double );
+		assertEquals( 9D, ret );
+	}
+	
 	@Test
     public void testTotalMedian() throws Exception
     {

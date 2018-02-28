@@ -10,7 +10,6 @@
 
 	<groupId>org.eclipse.birt.build</groupId>
 	<artifactId>org.eclipse.birt.build-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
